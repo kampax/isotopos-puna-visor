@@ -342,18 +342,6 @@
 
     selectedId = r.id;
 
-    // Los datos propios no tienen ficha pública; solo se señalan en mapa y gráfico.
-    if (r.dato === 'propio') {
-      $('detail').innerHTML = `
-        <div class="sample-detail-header">
-          <h3>Muestra ID ${esc(r.id)} (${esc(r.etiqueta || r.vega)}) · Dato propio</h3>
-        </div>
-        <p class="filter-help">Los datos propios se muestran en el mapa y el gráfico; su ficha completa no es pública.</p>
-      `;
-      syncSelection();
-      return;
-    }
-
     const items = [
       ['ID Maestro / Etiqueta', `${r.id} · ${r.etiqueta || 'Sin etiqueta'}`],
       ['Sitio / Vega', r.vega || 'Sin información'],
@@ -697,12 +685,11 @@
 
     $('plotNote').textContent = `${pairs.filter(r => !M.geo(r)).length} pares sin coordenadas representados. Clic en la leyenda: mostrar/ocultar; doble clic: aislar un tipo (con y sin coordenadas). El ajuste LMWL OLS usa precipitación y nieve de los filtros (${fitCounts}); ocultar series en la leyenda no cambia el cálculo. Restablecer recupera la vista completa.`;
 
-    // Actualizar Tabla de Registros (solo bibliografía; los datos propios no se listan)
-    const listed = current.filter(r => r.dato === 'bibliografía');
-    $('tableCount').textContent = `${fmt(listed.length, 0)} registros bibliográficos`;
-    $('downloadXlsx').disabled = !listed.length;
+    // Actualizar Tabla de Registros
+    $('tableCount').textContent = `${fmt(current.length, 0)} registros`;
+    $('downloadXlsx').disabled = !current.length;
 
-    $('rows').innerHTML = listed.map(r => {
+    $('rows').innerHTML = current.map(r => {
       const isSelected = Number(r.id) === Number(selectedId);
       const datoBadge = r.dato === 'propio'
         ? `<span class="badge-clean">Propio</span>`
@@ -810,22 +797,21 @@
   $('downloadXlsx').onclick = async () => {
     const btn = $('downloadXlsx');
     const status = $('downloadStatus');
-    const listed = current.filter(r => r.dato === 'bibliografía');
-    if (!listed.length) return;
+    if (!current.length) return;
 
     btn.disabled = true;
-    status.textContent = `Generando libro Excel con ${fmt(listed.length, 0)} registros bibliográficos…`;
+    status.textContent = `Generando libro Excel con ${fmt(current.length, 0)} registros…`;
 
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
-      window.IsotopeExport.downloadExcel(listed, 'Isotopos_Bibliografia_Puna_2026.xlsx', window.XLSX);
-      status.textContent = `Descarga solicitada: Isotopos_Bibliografia_Puna_2026.xlsx (${listed.length} registros)`;
+      window.IsotopeExport.downloadExcel(current, 'Isotopos_Completo_Puna_2026.xlsx', window.XLSX);
+      status.textContent = `Descarga solicitada: Isotopos_Completo_Puna_2026.xlsx (${current.length} registros)`;
     } catch (err) {
       console.error(err);
       status.textContent = 'Error al generar el archivo Excel. Por favor, reintenta.';
     } finally {
-      btn.disabled = !listed.length;
+      btn.disabled = !current.length;
     }
   };
 

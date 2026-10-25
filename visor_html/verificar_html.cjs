@@ -85,15 +85,7 @@ rawRows.forEach((r, i) => {
   assert.equal(exported[i]['C. Eléctrica (texto original)'], r.ce_raw);
   assert.equal(exported[i]['Cloruro (texto original)'], r.ppm_cl_raw);
 });
-assert.equal(M.filter(d, { ...f, search: 'NO_EXISTE_MUESTRA_XYZ' }).length, 0);
-
-// Los datos propios se publican sin atributos fuera de mapa y gráfico.
-const privateFields = ['time', 'conductividad', 'ce_us_cm', 'ce_raw', 'ppm_cl', 'ppm_cl_raw', 'ph', 'caudal', 'tipo_original', 'nota', 'foto', 'doi'];
-for (const r of d.filter(r => r.dato === 'propio')) {
-  for (const k of privateFields) assert(r[k] === null || r[k] === '', `Dato propio ${r.id} publica ${k}`);
-}
-console.log('✔ Datos propios publicados sin atributos privados.');
-assert.equal(M.fit([]).ok, false);
+assert.equal(M.filter(d, { ...f, search: 'NO_EXISTE_MUESTRA_XYZ' }).length, 0);assert.equal(M.fit([]).ok, false);
 console.log('✔ Alturas desconocidas, IDs únicos, selección vacía y calificadores del Excel verificados.');
 
 console.log('TODAS LAS PRUEBAS DE visor_html PASARON SATISFACTORIAMENTE.');

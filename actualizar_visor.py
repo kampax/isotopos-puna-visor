@@ -166,13 +166,6 @@ for idx, r in df.iterrows():
         'has_coords': has_coords,
         'has_isotopes': has_isotopes
     }
-    # Los datos propios solo se publican con lo que usan el mapa y el gráfico.
-    if dato == 'propio':
-        rec.update({
-            'time': '', 'conductividad': None, 'ce_us_cm': None, 'ce_raw': '',
-            'ppm_cl': None, 'ppm_cl_raw': '', 'ph': None, 'caudal': '',
-            'tipo_original': '', 'nota': '', 'foto': '', 'doi': None
-        })
     records.append(rec)
 
 os.makedirs(os.path.dirname(out_path), exist_ok=True)

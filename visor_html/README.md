@@ -13,9 +13,9 @@ También se puede servir desde esta carpeta con `python -m http.server 8765 --bi
 - Búsqueda por ID, etiqueta, sitio, tipo, origen y notas.
 - Procedencia, tipo de agua, publicación/campaña, frecuencia, altura y extensión del mapa.
 - Selección múltiple por clic en tipo y publicación; ninguna selección incluye todas las categorías.
-- Mapa con registros agrupados por coordenadas y gráfico isotópico con todos los datos; tabla y ficha solo con registros bibliográficos.
+- Mapa con registros agrupados por coordenadas, gráfico isotópico, tabla y ficha.
 - Ajuste OLS de precipitación y nieve con al menos tres pares y variación en δ¹⁸O.
-- Excel de los registros bibliográficos de la selección: hojas `Muestras` (26 columnas) y `Resumen Estadístico`, con DOI y calificadores textuales de conductividad y cloruros.
+- Excel de la selección: hojas `Muestras` (26 columnas) y `Resumen Estadístico`, con DOI y calificadores textuales de conductividad y cloruros.
 
 El filtro de extensión visible restringe los registros georreferenciados. Los registros sin coordenadas permanecen incluidos mientras la opción correspondiente esté marcada.
 
@@ -27,7 +27,7 @@ La selección completa produce pendiente 7,70, intercepto 13,96 y R² 0,9421 (56
 
 ## Actualización de datos
 
-En la carpeta superior se conserva `Isotopos completo2026.csv`, solo en el equipo local (no se sube al repositorio). Los datos propios se publican sin fecha, notas, fotos ni parámetros fisicoquímicos. Ejecutar `ACTUALIZAR_VISOR.bat` o `python actualizar_visor.py` (requiere pandas) para regenerar `data.js`. Las pruebas normales admiten cambios en el número de registros. Para comprobar además los valores de referencia de la versión inicial de 300 registros, ejecutar `node verificar_html.cjs --baseline`.
+En la carpeta superior se conserva `Isotopos completo2026.csv`, solo en el equipo local (no se sube al repositorio). Ejecutar `ACTUALIZAR_VISOR.bat` o `python actualizar_visor.py` (requiere pandas) para regenerar `data.js`. Las pruebas normales admiten cambios en el número de registros. Para comprobar además los valores de referencia de la versión inicial de 300 registros, ejecutar `node verificar_html.cjs --baseline`.
 
 ## Revisión del 14 de septiembre de 2026
 

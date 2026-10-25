@@ -9,7 +9,7 @@ Web publicada: https://kampax.github.io/isotopos-puna-visor/
 
 ## Datos propios
 
-La planilla original (`Isotopos completo2026.csv`) **no forma parte del repositorio**: queda solo en el equipo local. El visor publica los datos propios únicamente con lo necesario para el mapa y el gráfico (ubicación, altura, tipo de agua, origen y par isotópico). No se listan en la tabla, no tienen ficha de detalle y no se incluyen en la descarga Excel. La tabla, la ficha y la descarga muestran solo los registros bibliográficos.
+La planilla original (`Isotopos completo2026.csv`) queda solo en el equipo local y no se sube al repositorio. El visor publica todos los registros, propios y bibliográficos, con sus atributos completos: se ven en el mapa, el gráfico, la tabla y la ficha, y se pueden descargar en Excel.
 
 ## Actualización de la web
 

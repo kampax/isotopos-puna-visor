@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Isótopos Puna & Andes — Explorador Científico 2026</title>
+  <meta name="description" content="Explorador y visor científico de isótopos ambientales estables (d18O y d2H) en la Puna Argentina y Andes Centrales. Tabla completa 2026.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos Vendor y Propios -->
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="css/style.css?v=20260915-chart-origin">
+
+  <!-- Scripts Vendor y Lógica -->
+  <script defer src="vendor/leaflet.js"></script>
+  <script defer src="vendor/chart.js"></script>
+  <script defer src="vendor/xlsx.full.min.js"></script>
+  <script defer src="data.js?v=667215e3a78f"></script>
+  <script defer src="js/model.js?v=20260915-sources"></script>
+  <script defer src="js/export.js"></script>
+  <script defer src="js/app.js?v=20261025-propios"></script>
+</head>
+<body>
+
+  <!-- Encabezado Principal -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <img src="favicon.svg" alt="Isótopos Puna" class="brand-logo" width="42" height="42">
+      <div class="brand-info">
+        <h1>Isótopos Puna & Andes</h1>
+        <span id="datasetSubtitle">Explorador Hidrogeológico y Meteorológico · Tabla Completa 2026</span>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge-tag badge-preliminary">Propios + Bibliografía</span>
+      <span class="badge-tag badge-version">v2026.1</span>
+    </div>
+  </header>
+
+  <!-- Contenedor de la Aplicación -->
+  <div class="app-container">
+
+    <!-- Barra Lateral de Filtros -->
+    <aside class="filter-sidebar" aria-label="Panel de Filtros">
+      <div class="filter-header">
+        <h2>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtros de Selección
+        </h2>
+        <button id="reset" class="btn-reset" type="button" title="Restablecer todos los filtros a sus valores predeterminados">Restablecer</button>
+      </div>
+
+      <!-- Búsqueda Rápida de Muestras -->
+      <div class="filter-search-box">
+        <svg class="filter-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="quickSearch" type="search" placeholder="Buscar ID, etiqueta, vega, autor…" aria-label="Buscar en la base de datos">
+      </div>
+
+      <p class="filter-help">Haz clic para activar o desactivar categorías sin presionar teclas adicionales. Sin selección se incluyen todas.</p>
+
+      <!-- Filtro Procedencia del Dato -->
+      <div class="filter-group">
+        <label for="dataType">Procedencia del dato</label>
+        <select id="dataType" class="single-select" aria-label="Filtrar por procedencia">
+          <option value="all" selected>Todos los datos</option>
+          <option value="propio">Datos propios de campo</option>
+          <option value="bibliografía">Compilación bibliográfica</option>
+        </select>
+      </div>
+
+      <!-- Filtro Tipo de Muestra -->
+      <div class="filter-group">
+        <label for="type">Tipo de muestra de agua</label>
+        <select id="type" multiple size="5" aria-label="Filtrar por tipo de agua"></select>
+      </div>
+
+      <!-- Filtro Origen / Campaña / Publicación -->
+      <div class="filter-group">
+        <label for="campaign">Origen / campaña — datos propios</label>
+        <select id="campaign" multiple size="6" aria-label="Filtrar por origen o campaña de datos propios"></select>
+        <span id="campaignCount" class="filter-help">Calculando campañas disponibles…</span>
+      </div>
+
+      <div class="filter-group">
+        <label for="publication">Publicaciones bibliográficas</label>
+        <select id="publication" multiple size="6" aria-label="Filtrar por publicaciones bibliográficas"></select>
+        <span id="publicationCount" class="filter-help">Calculando publicaciones disponibles…</span>
+      </div>
+
+      <!-- Filtro Frecuencia -->
+      <div class="filter-group">
+        <label for="frequency">Frecuencia de muestreo</label>
+        <select id="frequency" class="single-select" aria-label="Filtrar por frecuencia">
+          <option value="all" selected>Todas las frecuencias</option>
+          <option value="unique">Puntual (único)</option>
+          <option value="monthly">Serie mensual</option>
+        </select>
+      </div>
+
+      <!-- Filtro Altura -->
+      <div class="filter-group">
+        <label>Altura (m s. n. m.)</label>
+        <div class="height-range-inputs">
+          <input id="min" type="number" placeholder="Mínima" aria-label="Altura mínima en metros sobre el nivel del mar">
+          <span>—</span>
+          <input id="max" type="number" placeholder="Máxima" aria-label="Altura máxima en metros sobre el nivel del mar">
+        </div>
+        <div class="preset-buttons">
+          <button id="above3200" class="btn-preset" type="button">≥ 3.200 m</button>
+          <button id="clearHeight" class="btn-preset" type="button">Toda altura</button>
+        </div>
+        <label class="custom-checkbox">
+          <input id="unknownHeight" type="checkbox" checked>
+          <span>Incluir registros con altura no informada</span>
+        </label>
+      </div>
+
+      <!-- Opciones Avanzadas de Gráfico y Mapa -->
+      <div class="filter-group">
+        <label>Opciones Espaciales</label>
+        <label class="custom-checkbox">
+          <input id="noCoords" type="checkbox" checked>
+          <span>Graficar muestras sin coordenadas (par completo)</span>
+        </label>
+        <label class="custom-checkbox">
+          <input id="viewport" type="checkbox">
+          <span>Filtrar por área visible del mapa (zoom / pan)</span>
+        </label>
+      </div>
+    </aside>
+
+    <!-- Área de Trabajo Principal -->
+    <main class="workspace-area">
+
+      <!-- Indicadores Métricos Clave (KPIs) -->
+      <section class="kpi-grid" aria-label="Resumen de datos filtrados">
+        <div class="kpi-card">
+          <b id="nTotal">0</b>
+          <span>Muestras Filtradas</span>
+        </div>
+        <div class="kpi-card">
+          <b id="nMap">0</b>
+          <span>Registros en Mapa</span>
+        </div>
+        <div class="kpi-card">
+          <b id="nGraph">0</b>
+          <span>Pares en Gráfico</span>
+        </div>
+        <div class="kpi-card">
+          <b id="nRain">0</b>
+          <span>Precipitaciones LMWL</span>
+        </div>
+        <div class="kpi-card">
+          <b id="nSources">0 / 0</b>
+          <span>Propios / Bibliografía</span>
+        </div>
+      </section>
+
+      <!-- Mensaje de Error / Alerta -->
+      <div id="error" class="alert-banner" role="alert"></div>
+
+      <!-- Visuales: Mapa y Gráfico Isotópico -->
+      <section class="visuals-grid">
+
+        <!-- Panel Mapa Espacial -->
+        <article class="card-panel">
+          <div class="panel-header">
+            <h2>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              Distribución Espacial
+            </h2>
+            <button id="fit" class="btn-secondary" type="button">Encuadrar selección</button>
+          </div>
+          <div id="map" aria-label="Mapa interactivo de muestras"></div>
+          <p id="mapNote" class="footnote-text"></p>
+        </article>
+
+        <!-- Panel Gráfico Isotópico -->
+        <article class="card-panel">
+          <div class="panel-header">
+            <h2>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V8"/></svg>
+              δ²H frente a δ¹⁸O
+            </h2>
+            <span class="panel-unit">‰ VSMOW</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="plot" aria-label="Diagrama de dispersión isotópico" role="img"></canvas>
+          </div>
+          <div class="chart-origin-controls" role="group" aria-label="Procedencia visible en el gráfico">
+            <span>Mostrar en el gráfico:</span>
+            <button id="plotOwn" type="button" class="btn-preset" aria-pressed="true">Datos propios</button>
+            <button id="plotBibliography" type="button" class="btn-preset" aria-pressed="true">Datos bibliográficos</button>
+          </div>
+          <div id="regression" class="equation-banner" aria-live="polite"></div>
+          <div id="selectionStatus" class="selection-banner" aria-live="polite"></div>
+          <p id="plotNote" class="footnote-text"></p>
+        </article>
+      </section>
+
+      <!-- Leyenda Isotópica -->
+      <div class="isotope-legend">
+        <span class="legend-item"><i class="legend-dot" style="background:#0284c7;"></i> Precipitación / Nieve</span>
+        <span class="legend-item"><i class="legend-dot" style="background:#16a34a;"></i> Vertiente / Manantial</span>
+        <span class="legend-item"><i class="legend-dot" style="background:#0d9488;"></i> Subterránea</span>
+        <span class="legend-item"><i class="legend-dot" style="background:#2563eb;"></i> Río / Cauce</span>
+        <span class="legend-item"><i class="legend-dot" style="background:#d97706;"></i> Pozas / Laguna</span>
+        <span class="legend-item"><i class="legend-ring"></i> Muestra seleccionada</span>
+        <span class="legend-item">○ Sin coordenadas</span>
+        <span class="legend-item"><i class="legend-solid-red"></i> Recta local LMWL</span>
+        <span class="legend-item"><i class="legend-dash"></i> Recta universal GMWL</span>
+      </div>
+
+      <!-- Metodología e Información -->
+      <details class="methodology-box">
+        <summary>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Información del Dataset, Métodos y Línea Meteórica Local (LMWL)
+        </summary>
+        <div class="methodology-content">
+          <p><strong>Recta universal:</strong> δ²H = 8 × δ¹⁸O + 10 (Craig, 1961). <strong>Recta meteórica local (LMWL):</strong> Calculada dinámicamente mediante Mínimos Cuadrados Ordinarios (OLS) sobre las muestras de precipitación y nieve activas en el filtro.</p>
+          <p id="datasetSummary"></p>
+          <p><strong>Exceso de deuterio:</strong> Calculado como d-excess = δ²H − 8 · δ¹⁸O (Dansgaard, 1964).</p>
+        </div>
+      </details>
+
+      <!-- Tabla de Registros y Ficha de Detalle -->
+      <article class="card-panel">
+        <div class="panel-header table-panel-header">
+          <h2>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Registros Bibliográficos de la Selección
+          </h2>
+          <div class="table-actions">
+            <span id="tableCount" class="table-count-badge">0 registros</span>
+            <button id="downloadXlsx" class="btn-download" type="button" aria-label="Descargar registros en formato Microsoft Excel">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar selección (.xlsx)
+            </button>
+          </div>
+        </div>
+        <p class="filter-help">Los datos propios se muestran en el mapa y el gráfico, pero no se listan ni se descargan.</p>
+        <p id="downloadStatus" class="download-status-msg" aria-live="polite"></p>
+
+        <!-- Tabla con scroll horizontal y vertical -->
+        <div class="tablewrap">
+          <table class="records-table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Etiqueta</th>
+                <th scope="col">Sitio / Vega</th>
+                <th scope="col">Tipo de Agua</th>
+                <th scope="col">Altura (m)</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">δ¹⁸O (‰)</th>
+                <th scope="col">δ²H (‰)</th>
+                <th scope="col">d-exc. (‰)</th>
+                <th scope="col">Origen / Campaña</th>
+                <th scope="col">Procedencia</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+
+        <!-- Ficha de Detalle Dinámica -->
+        <div id="detail" class="sample-detail-card">
+          <div class="sample-detail-header">
+            <h3>Ficha de Detalle de Muestra</h3>
+          </div>
+          <p class="filter-help">Selecciona cualquier fila de la tabla, punto del gráfico o marcador del mapa para inspeccionar sus atributos completos.</p>
+        </div>
+      </article>
+
+    </main>
+  </div>
+
+  <!-- Pie de Página -->
+  <footer class="app-footer">
+    <span>Base de Datos de Isótopos Puna Argentina & Andes Centrales · Compilación Completa 2026</span>
+    <span>Visualización científica interactiva basada en HTML5, Leaflet y Chart.js</span>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Solo los archivos del visor y su actualización forman parte del repositorio.
+/*
+!/.gitignore
+!/README.md
+!/ACTUALIZAR_VISOR.bat
+!/actualizar_visor.py
+!/visor_html/
+__pycache__/
+*.pyc
+.env
+.env.*
+node_modules/
+!/.github/
+!/PUBLICAR_VISOR.bat
+*.tmp

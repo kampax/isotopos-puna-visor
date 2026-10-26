@@ -69,14 +69,24 @@ for idx, r in df.iterrows():
     except:
         lon = None
 
-    # Cond
+    # Primera columna con valor entre los nombres actuales y los anteriores del CSV
+    def first_value(*cols):
+        for col in cols:
+            v = r.get(col)
+            if pd.notna(v) and str(v).strip() not in ('', 'nan'):
+                return v
+        return None
+
+    # Cond (Picarro)
+    cond_val = first_value('Conductividad Picarro', 'Conductividad')
     try:
-        cond = float(str(r.get('Conductividad')).replace(',', '.')) if pd.notna(r.get('Conductividad')) and str(r.get('Conductividad')).strip() != '' else None
+        cond = float(str(cond_val).replace(',', '.')) if cond_val is not None else None
     except:
         cond = None
 
-    # CE
-    ce_raw = str(r.get('C,Electrica (uS/cm)', '')).strip() if pd.notna(r.get('C,Electrica (uS/cm)')) else ''
+    # CE: valor consolidado; si falta, el medido en campo
+    ce_val = first_value('CE (uS/cm)', 'CE campo (uS/cm)', 'C,Electrica (uS/cm)')
+    ce_raw = str(ce_val).strip() if ce_val is not None else ''
     try:
         ce = float(ce_raw.replace(',', '.')) if ce_raw else None
     except:
